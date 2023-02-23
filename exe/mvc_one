@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'erb'
+
+module MvcOne
+  class MyCLI < Thor
+    desc "new PROJECT_NAME", "Generate new application"
+    def new(name)
+      puts "Generating #{name}"
+    end
+
+    desc "generate controller/model/view/contract name", "Generate new controller/model/view."
+    def generate(layer, layer_name)
+      case layer
+      when 'controller' then puts "Generating controller #{layer_name}"
+      when 'model' then puts "Generating model #{layer_name}"
+      when 'view' then puts "Generating view #{layer_name}"
+      when 'contract' then puts "Generating contract #{layer_name}"
+      else
+        raise ArgumentError, "Undefined generator for #{layer}"
+      end
+    end
+
+    private
+
+    def project_template(name)
+      template = ERB.new <<-EOF
+          class ApplicationController
+            def name
+              <%= name %>
+            end
+          end
+      EOF
+      template.result(binding)
+    end
+  end
+end
+
+MvcOne::MyCLI.start(ARGV)
