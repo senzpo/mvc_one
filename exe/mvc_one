@@ -14,8 +14,12 @@ module MvcOne
     desc "generate controller/model/view/contract name", "Generate new controller/model/view."
     def generate(layer, layer_name)
       case layer
-      when 'controller' then puts "Generating controller #{layer_name}"
-      when 'model' then puts "Generating model #{layer_name}"
+      when 'controller'
+        puts "Generating controller #{layer_name}"
+        generate_controller layer_name
+      when 'model'
+        puts "Generating model #{layer_name}"
+        generate_model layer_name
       when 'view' then puts "Generating view #{layer_name}"
       when 'contract' then puts "Generating contract #{layer_name}"
       else
@@ -24,6 +28,20 @@ module MvcOne
     end
 
     private
+
+    def generate_controller(name)
+      raise Error, 'cd into your project repository' unless Dir.exists? 'app/controllers'
+      file_name = "app/controllers/#{name}_controller.rb"
+      template = ERB.new(File.read('../templates/app/controller_template.erb'))
+      File.write(file_name, template.result(binding))
+    end
+
+    def generate_model(name)
+      raise Error, 'cd into your project repository' unless Dir.exists? 'app/models'
+      file_name = "app/models/#{name}.rb"
+      template = ERB.new(File.read('../templates/app/model_template.erb'))
+      File.write(file_name, template.result(binding))
+    end
 
     def project_template(name)
       name_normalized = name.downcase.gsub(/\s/, '_')
