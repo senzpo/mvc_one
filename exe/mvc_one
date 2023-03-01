@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 require 'thor'
 require 'erb'
+require 'pry'
 
 module MvcOne
   class MyCLI < Thor
     desc "new PROJECT_NAME", "Generate new application"
     def new(name)
       puts "Generating #{name}"
+      project_template(name)
     end
 
     desc "generate controller/model/view/contract name", "Generate new controller/model/view."
@@ -24,6 +26,9 @@ module MvcOne
     private
 
     def project_template(name)
+      name_normalized = name.downcase.gsub(/\s/, '_')
+      make_default_dirs(name_normalized)
+      make_default_files(name_normalized)
       template = ERB.new <<-EOF
           class ApplicationController
             def name
@@ -33,7 +38,43 @@ module MvcOne
       EOF
       template.result(binding)
     end
+
+    def make_default_files(name_normalized)
+      config_ru = ERB.new(File.read('templates/general/config_ru.erb'))
+      File.write "#{name_normalized}/config.ru", config_ru.result(binding)
+
+      rakefile = ERB.new(File.read('templates/general/rakefile.erb'))
+      File.write "#{name_normalized}/Rakefile", rakefile.result(binding)
+
+      application_rb = ERB.new(File.read('templates/general/application_rb.erb'))
+      File.write "#{name_normalized}/application.rb", config_ru.result(binding)
+
+      routes_rb = ERB.new(File.read('templates/config/routes_rb.erb'))
+      File.write "#{name_normalized}/app/config/routes.rb", routes_rb.result(binding)
+
+      database_yml = ERB.new(File.read('templates/general/database_yml.erb'))
+      File.write "#{name_normalized}/config/database.yml", database_yml.result(binding)
+
+      secrets_yml = ERB.new(File.read('templates/general/secrets_yml.erb'))
+      File.write "#{name_normalized}/config/secrets.yml", secrets_yml.result(binding)
+    end
+
+    def make_default_dirs(root_dir_name)
+      raise Error, "Project directory already exists: #{root_dir_name}" if Dir.exists? root_dir_name
+
+      Dir.mkdir(root_dir_name)
+
+      %w[app config db].each do |dir_name|
+        Dir.mkdir("#{root_dir_name}/#{dir_name}")
+      end
+      Dir.mkdir("#{root_dir_name}/db/migrations")
+
+      %w[controllers models views contracts config].each do |dir_name|
+        Dir.mkdir("#{root_dir_name}/app/#{dir_name}")
+      end
+    end
   end
 end
+
 
 MvcOne::MyCLI.start(ARGV)
