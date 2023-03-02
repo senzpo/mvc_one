@@ -32,14 +32,14 @@ module MvcOne
     def generate_controller(name)
       raise Error, 'cd into your project repository' unless Dir.exists? 'app/controllers'
       file_name = "app/controllers/#{name}_controller.rb"
-      template = ERB.new(File.read('../templates/app/controller_template.erb'))
+      template = ERB.new(File.read(File.join(gem_path, 'templates/app/controller_template.erb')))
       File.write(file_name, template.result(binding))
     end
 
     def generate_model(name)
       raise Error, 'cd into your project repository' unless Dir.exists? 'app/models'
       file_name = "app/models/#{name}.rb"
-      template = ERB.new(File.read('../templates/app/model_template.erb'))
+      template = ERB.new(File.read(File.join(gem_path, 'templates/app/model_template.erb')))
       File.write(file_name, template.result(binding))
     end
 
@@ -58,23 +58,26 @@ module MvcOne
     end
 
     def make_default_files(name_normalized)
-      config_ru = ERB.new(File.read('templates/general/config_ru.erb'))
+      config_ru = ERB.new(File.read(File.join(gem_path, 'templates/general/config_ru.erb')))
       File.write "#{name_normalized}/config.ru", config_ru.result(binding)
 
-      rakefile = ERB.new(File.read('templates/general/rakefile.erb'))
+      rakefile = ERB.new(File.read(File.join(gem_path, 'templates/general/rakefile.erb')))
       File.write "#{name_normalized}/Rakefile", rakefile.result(binding)
 
-      application_rb = ERB.new(File.read('templates/general/application_rb.erb'))
-      File.write "#{name_normalized}/application.rb", config_ru.result(binding)
+      application_rb = ERB.new(File.read(File.join(gem_path, 'templates/general/application_rb.erb')))
+      File.write "#{name_normalized}/application.rb", application_rb.result(binding)
 
-      routes_rb = ERB.new(File.read('templates/config/routes_rb.erb'))
+      routes_rb = ERB.new(File.read(File.join(gem_path, 'templates/config/routes_rb.erb')))
       File.write "#{name_normalized}/app/config/routes.rb", routes_rb.result(binding)
 
-      database_yml = ERB.new(File.read('templates/general/database_yml.erb'))
+      database_yml = ERB.new(File.read(File.join(gem_path, 'templates/general/database_yml.erb')))
       File.write "#{name_normalized}/config/database.yml", database_yml.result(binding)
 
-      secrets_yml = ERB.new(File.read('templates/general/secrets_yml.erb'))
+      secrets_yml = ERB.new(File.read(File.join(gem_path, 'templates/general/secrets_yml.erb')))
       File.write "#{name_normalized}/config/secrets.yml", secrets_yml.result(binding)
+
+      gemfile = ERB.new(File.read(File.join(gem_path, 'templates/general/gemfile.erb')))
+      File.write "#{name_normalized}/Gemfile", gemfile.result(binding)
     end
 
     def make_default_dirs(root_dir_name)
@@ -91,6 +94,10 @@ module MvcOne
         Dir.mkdir("#{root_dir_name}/app/#{dir_name}")
       end
     end
+  end
+
+  def gem_path
+    File.expand_path("#{File.dirname(__FILE__)}/..")
   end
 end
 
