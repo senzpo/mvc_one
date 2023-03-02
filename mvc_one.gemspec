@@ -30,6 +30,15 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency "thor"
+  spec.add_dependency "slim"
+  spec.add_dependency "bcrypt"
+  spec.add_dependency "rack"
+  spec.add_dependency "rack-session"
+  spec.add_dependency "sequel"
+  spec.add_dependency "sqlite3"
+  spec.add_dependency "dry-struct"
+  spec.add_dependency "dry-transaction"
+  spec.add_dependency "dry-validation"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
