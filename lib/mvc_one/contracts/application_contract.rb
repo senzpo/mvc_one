@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'dry-validation'
+
 # Abstract class for Contract realisation in application
-class MvcOne::ApplicationContract < Dry::Validation::Contract
+module MvcOne
+  class ApplicationContract < Dry::Validation::Contract
+  end
 end

@@ -1,17 +1,19 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'thor'
 require 'erb'
 require 'pry'
 
 module MvcOne
   class MyCLI < Thor
-    desc "new PROJECT_NAME", "Generate new application"
+    desc 'new PROJECT_NAME', 'Generate new application'
     def new(name)
       puts "Generating #{name}"
       project_template(name)
     end
 
-    desc "generate controller/model/view/contract name", "Generate new controller/model/view."
+    desc 'generate controller/model/view/contract name', 'Generate new controller/model/view.'
     def generate(layer, layer_name)
       case layer
       when 'controller'
@@ -30,14 +32,16 @@ module MvcOne
     private
 
     def generate_controller(name)
-      raise Error, 'cd into your project repository' unless Dir.exists? 'app/controllers'
+      raise Error, 'cd into your project repository' unless Dir.exist? 'app/controllers'
+
       file_name = "app/controllers/#{name}_controller.rb"
       template = ERB.new(File.read(File.join(gem_path, 'templates/app/controller_template.erb')))
       File.write(file_name, template.result(binding))
     end
 
     def generate_model(name)
-      raise Error, 'cd into your project repository' unless Dir.exists? 'app/models'
+      raise Error, 'cd into your project repository' unless Dir.exist? 'app/models'
+
       file_name = "app/models/#{name}.rb"
       template = ERB.new(File.read(File.join(gem_path, 'templates/app/model_template.erb')))
       File.write(file_name, template.result(binding))
@@ -47,13 +51,13 @@ module MvcOne
       name_normalized = name.downcase.gsub(/\s/, '_')
       make_default_dirs(name_normalized)
       make_default_files(name_normalized)
-      template = ERB.new <<-EOF
+      template = ERB.new <<-ERBTEMPLATE
           class ApplicationController
             def name
               <%= name %>
             end
           end
-      EOF
+      ERBTEMPLATE
       template.result(binding)
     end
 
@@ -81,7 +85,7 @@ module MvcOne
     end
 
     def make_default_dirs(root_dir_name)
-      raise Error, "Project directory already exists: #{root_dir_name}" if Dir.exists? root_dir_name
+      raise Error, "Project directory already exists: #{root_dir_name}" if Dir.exist? root_dir_name
 
       Dir.mkdir(root_dir_name)
 
@@ -100,6 +104,5 @@ module MvcOne
     File.expand_path("#{File.dirname(__FILE__)}/..")
   end
 end
-
 
 MvcOne::MyCLI.start(ARGV)

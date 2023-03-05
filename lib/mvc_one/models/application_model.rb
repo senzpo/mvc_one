@@ -7,5 +7,7 @@ module Types
 end
 
 # Domain model
-class MvcOne::ApplicationModel < Dry::Struct
+module MvcOne
+  class ApplicationModel < Dry::Struct
+  end
 end
