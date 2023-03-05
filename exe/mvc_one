@@ -83,13 +83,14 @@ module MvcOne
       gemfile = ERB.new(File.read(File.join(gem_path, 'templates/general/gemfile.erb')))
       File.write "#{name_normalized}/Gemfile", gemfile.result(binding)
 
-      app_layout = ERB.new(File.read(File.join(gem_path, 'templates/app/application_layout.slim')))
+      app_layout = File.read(File.join(gem_path, 'templates/app/application_layout.slim'))
       File.write "#{name_normalized}/app/views/application_layout.slim", app_layout
 
       welcome_controller = ERB.new(File.read(File.join(gem_path, 'templates/app/welcome_controller_rb.erb')))
       File.write "#{name_normalized}/app/controllers/welcome_controller.rb", welcome_controller.result(binding)
 
-      welcome_index = ERB.new(File.read(File.join(gem_path, 'templates/app/welcome_index.slim')))
+      Dir.mkdir("#{name_normalized}/app/views/welcome")
+      welcome_index = File.read(File.join(gem_path, 'templates/app/welcome_index.slim'))
       File.write "#{name_normalized}/app/views/welcome/index.slim", welcome_index
     end
 
