@@ -27,7 +27,7 @@ module MvcOne
     end
 
     def initialize
-      @router = RegexpRouter.new(File.join(File.dirname(__FILE__), 'app', 'config', 'routes.rb'))
+      @router = RegexpRouter.new(File.join('app', 'config', 'routes.rb'))
     end
 
     def self.launch
