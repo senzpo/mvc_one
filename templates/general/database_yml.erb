@@ -1,0 +1,12 @@
+development:
+  db:
+    name: '<%= name_normalized%>.db'
+    adapter: 'sqlite'
+    connection_line: 'sqlite://db/<%= name_normalized%>.db'
+    path: './db/<%= name_normalized%>.db'
+test:
+  db:
+    name: '<%= name_normalized%>.db'
+    adapter: 'sqlite'
+    connection_line: 'sqlite://db/test_<%= name_normalized%>.db'
+    path: './db/test_<%= name_normalized%>.db'

@@ -1,19 +1,27 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'thor'
 require 'erb'
+require 'pry'
 
 module MvcOne
   class MyCLI < Thor
-    desc "new PROJECT_NAME", "Generate new application"
+    desc 'new PROJECT_NAME', 'Generate new application'
     def new(name)
       puts "Generating #{name}"
+      project_template(name)
     end
 
-    desc "generate controller/model/view/contract name", "Generate new controller/model/view."
+    desc 'generate controller/model/view/contract name', 'Generate new controller/model/view.'
     def generate(layer, layer_name)
       case layer
-      when 'controller' then puts "Generating controller #{layer_name}"
-      when 'model' then puts "Generating model #{layer_name}"
+      when 'controller'
+        puts "Generating controller #{layer_name}"
+        generate_controller layer_name
+      when 'model'
+        puts "Generating model #{layer_name}"
+        generate_model layer_name
       when 'view' then puts "Generating view #{layer_name}"
       when 'contract' then puts "Generating contract #{layer_name}"
       else
@@ -23,15 +31,86 @@ module MvcOne
 
     private
 
+    def generate_controller(name)
+      raise Error, 'cd into your project repository' unless Dir.exist? 'app/controllers'
+
+      file_name = "app/controllers/#{name}_controller.rb"
+      template = ERB.new(File.read(File.join(gem_path, 'templates/app/controller_template.erb')))
+      File.write(file_name, template.result(binding))
+    end
+
+    def generate_model(name)
+      raise Error, 'cd into your project repository' unless Dir.exist? 'app/models'
+
+      file_name = "app/models/#{name}.rb"
+      template = ERB.new(File.read(File.join(gem_path, 'templates/app/model_template.erb')))
+      File.write(file_name, template.result(binding))
+    end
+
     def project_template(name)
-      template = ERB.new <<-EOF
+      name_normalized = name.downcase.gsub(/\s/, '_')
+      make_default_dirs(name_normalized)
+      make_default_files(name_normalized)
+      template = ERB.new <<-ERBTEMPLATE
           class ApplicationController
             def name
               <%= name %>
             end
           end
-      EOF
+      ERBTEMPLATE
       template.result(binding)
+    end
+
+    def make_default_files(name_normalized)
+      config_ru = ERB.new(File.read(File.join(gem_path, 'templates/general/config_ru.erb')))
+      File.write "#{name_normalized}/config.ru", config_ru.result(binding)
+
+      rakefile = ERB.new(File.read(File.join(gem_path, 'templates/general/rakefile.erb')))
+      File.write "#{name_normalized}/Rakefile", rakefile.result(binding)
+
+      application_rb = ERB.new(File.read(File.join(gem_path, 'templates/general/application_rb.erb')))
+      File.write "#{name_normalized}/application.rb", application_rb.result(binding)
+
+      routes_rb = ERB.new(File.read(File.join(gem_path, 'templates/config/routes_rb.erb')))
+      File.write "#{name_normalized}/app/config/routes.rb", routes_rb.result(binding)
+
+      database_yml = ERB.new(File.read(File.join(gem_path, 'templates/general/database_yml.erb')))
+      File.write "#{name_normalized}/config/database.yml", database_yml.result(binding)
+
+      secrets_yml = ERB.new(File.read(File.join(gem_path, 'templates/general/secrets_yml.erb')))
+      File.write "#{name_normalized}/config/secrets.yml", secrets_yml.result(binding)
+
+      gemfile = ERB.new(File.read(File.join(gem_path, 'templates/general/gemfile.erb')))
+      File.write "#{name_normalized}/Gemfile", gemfile.result(binding)
+
+      app_layout = File.read(File.join(gem_path, 'templates/app/application_layout.slim'))
+      File.write "#{name_normalized}/app/views/application_layout.slim", app_layout
+
+      welcome_controller = ERB.new(File.read(File.join(gem_path, 'templates/app/welcome_controller_rb.erb')))
+      File.write "#{name_normalized}/app/controllers/welcome_controller.rb", welcome_controller.result(binding)
+
+      Dir.mkdir("#{name_normalized}/app/views/welcome")
+      welcome_index = File.read(File.join(gem_path, 'templates/app/welcome_index.slim'))
+      File.write "#{name_normalized}/app/views/welcome/index.slim", welcome_index
+    end
+
+    def make_default_dirs(root_dir_name)
+      raise Error, "Project directory already exists: #{root_dir_name}" if Dir.exist? root_dir_name
+
+      Dir.mkdir(root_dir_name)
+
+      %w[app config db].each do |dir_name|
+        Dir.mkdir("#{root_dir_name}/#{dir_name}")
+      end
+      Dir.mkdir("#{root_dir_name}/db/migrations")
+
+      %w[controllers models views contracts config].each do |dir_name|
+        Dir.mkdir("#{root_dir_name}/app/#{dir_name}")
+      end
+    end
+
+    def gem_path
+      File.expand_path("#{File.dirname(__FILE__)}/..")
     end
   end
 end

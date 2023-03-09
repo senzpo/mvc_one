@@ -1,0 +1,50 @@
+# frozen_string_literal: true
+
+# Controller for <%= name.capitalize%>
+class <%= name.capitalize%>Controller < ApplicationController
+  def index
+    projects = <%= name.capitalize%>Repository.all
+    # serialize here
+  end
+
+  def create
+    contract = <%= name.capitalize%>Contract.new.call(request_params)
+    if contract.failure?
+      return render(
+        code: 422, body: contract.errors.to_h.to_json,
+        headers: { 'content-type' => 'application/json' }
+      )
+    end
+
+    <%= name%> = <%= name.capitalize%>Repository.create(contract.to_h)
+    render code: 201, body: <%= name%>.to_h.to_json, headers: { 'content-type' => 'application/json' }
+  end
+
+  def update
+    contract = <%= name.capitalize%>Contract.new.call(request_params)
+    if contract.success?
+      <%= name.capitalize%>Repository.update(params[:id], contract.to_h)
+
+      head 204
+    else
+      render code: 422, body: contract.errors
+    end
+  rescue ApplicationRepository::NotFoundRecord
+    head 404
+  end
+
+  def delete
+    <%= name.capitalize%>Repository.delete(params[:id])
+
+    head 204
+  rescue ApplicationRepository::NotFoundRecord
+    head 404
+  end
+
+  def show
+    <%= name%> = <%= name%>Repository.find(id: params[:id])
+    #serialize here
+  rescue ApplicationRepository::NotFoundRecord
+    head 404
+  end
+end

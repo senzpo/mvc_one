@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+# Rack friendly launcher for project
+class Application < MvcOne::Application
+end
+
+Dir[File.join(File.dirname(__FILE__), 'app', '**', '*.rb')].each { |file| require file }

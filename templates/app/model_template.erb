@@ -1,0 +1,5 @@
+# frozen_string_literal: true
+
+class <%= name.capitalize%> < ApplicationModel
+  attribute? :id, Types::Coercible::Integer.optional.meta(info: 'Uniq ID')
+end
